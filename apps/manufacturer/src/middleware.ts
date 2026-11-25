@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { SESSION_COOKIE_NAME, resolveRouteRule } from '@ideeza/auth/edge';
+import { resolveRouteRule } from '@ideeza/auth/edge';
+import { SESSION_COOKIE } from '@/lib/session-cookie.js';
 
 /** Header the middleware uses to hand the resolved path to the server layout. */
 export const PATH_HEADER = 'x-ideeza-path';
@@ -25,7 +26,7 @@ export const middleware = (request: NextRequest): NextResponse => {
   }
   if (rule.anonymous === true) return NextResponse.next();
 
-  const hasSession = request.cookies.get(SESSION_COOKIE_NAME)?.value;
+  const hasSession = request.cookies.get(SESSION_COOKIE)?.value;
   if (hasSession === undefined || hasSession === '') {
     const target = new URL('/auth/sign-in', request.url);
     target.searchParams.set('next', pathname);

@@ -101,7 +101,14 @@ cluster, seeds the reference scenario and starts both panels against it, so a
 quote sent in the manufacturer window shows up in the buyer window on a
 refresh. Ctrl+C removes everything it made.
 
-Both panels run with `REVIEW_DIRECT_SIGN_IN=1`, which replaces the password
+Sign-in is off (owner decision, 2026-11-26): both panels — here and on the
+hosted deployments — enter every visitor as the seeded account with the most to
+look at, with no password, so anyone with a link is in. `/auth/sign-in?pick=1`
+(where signing out lands) switches account. `REQUIRE_SIGN_IN=1` brings the
+password form back. Each panel keeps its own session cookie, so both can be open
+side by side on one machine.
+
+Earlier text, kept for the token mechanism it describes: Both panels run with `REVIEW_DIRECT_SIGN_IN=1`, which replaces the password
 form with one click per seeded account: opening either panel signs you in, and
 `/auth/sign-in?pick=1` (where signing out lands) switches account. That
 variable is set by `tools/review-environment.mjs` and nowhere else — the route

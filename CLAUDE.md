@@ -276,11 +276,15 @@ apps; CI fails on a violation.
 
 - Sessions are opaque, server-side, `httpOnly`, `sameSite: lax`, `secure` in
   production; scrypt N=2^15; lockout after failed attempts. Do not weaken.
-- `REVIEW_DIRECT_SIGN_IN=1` enables `/auth/enter` (password-less). It is set
-  **only** by `tools/review-environment.mjs`. Off localhost it also demands
-  `REVIEW_DIRECT_SIGN_IN_TOKEN` (16+ chars) via `?token=`/cookie
-  (`directSignInAdmitted`). Never set either on anything holding real data;
-  never remove the host/token check. `docs/DEPLOY-REVIEW.md` is the recipe.
+- **Sign-in is off (owner decision, 2026-11-26).** Both panels enter every
+  visitor on sight through `/auth/enter` as the seeded account with the most to
+  look at — locally and on the hosted panels, so anyone with a link can read and
+  change the demo data. `REQUIRE_SIGN_IN=1` restores the password form (the
+  verify harnesses set it); `REVIEW_DIRECT_SIGN_IN_OPEN=0` restores the hosted
+  token check. Never point a panel in this state at real data.
+- Each panel has its own session cookie (`ideeza_session_buyer`,
+  `ideeza_session_shop`, in `src/lib/session-cookie.ts`), so the two can be
+  open side by side on one host.
 - Never commit `.env`; `.env.example` is the template. No secrets in code,
   fixtures or docs.
 

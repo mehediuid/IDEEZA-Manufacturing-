@@ -2,7 +2,8 @@
 
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { AuthError, SESSION_COOKIE_NAME } from '@ideeza/auth';
+import { AuthError } from '@ideeza/auth';
+import { SESSION_COOKIE } from '@/lib/session-cookie.js';
 import { authServices } from '@/lib/auth.js';
 import { directSignInEnabled } from '@/lib/direct-sign-in.js';
 
@@ -44,7 +45,7 @@ export const signInAction = async (
     const result = await services.authentication.signIn({ email, password });
 
     const store = await cookies();
-    store.set(SESSION_COOKIE_NAME, result.token, {
+    store.set(SESSION_COOKIE, result.token, {
       httpOnly: true,
       sameSite: 'lax',
       secure: process.env.NODE_ENV === 'production',
@@ -61,7 +62,7 @@ export const signInAction = async (
 
 export const signOutAction = async (): Promise<void> => {
   const store = await cookies();
-  const token = store.get(SESSION_COOKIE_NAME)?.value;
+  const token = store.get(SESSION_COOKIE)?.value;
   if (token !== undefined && token !== '') {
     try {
       await authServices().authentication.signOut(token);
@@ -69,7 +70,7 @@ export const signOutAction = async (): Promise<void> => {
       if (!(error instanceof AuthError)) throw error;
     }
   }
-  store.delete(SESSION_COOKIE_NAME);
+  store.delete(SESSION_COOKIE);
   // In review mode the sign-in page walks straight back in, so signing out
   // lands on the chooser instead: otherwise the session would be replaced
   // before the visitor saw anything, and switching account would be impossible.

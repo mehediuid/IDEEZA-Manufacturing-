@@ -40,9 +40,9 @@ const SHARED_AUTH_ROUTES: readonly RouteRule[] = Object.freeze([
 
 const USER_RULES: readonly RouteRule[] = Object.freeze([
     ...SHARED_AUTH_ROUTES,
-    // Review mode only: signing in without a password when the review
-    // environment asks for it. The route itself answers 404 unless
-    // REVIEW_DIRECT_SIGN_IN is set, so a rule here grants nothing on its own.
+    // Signing in without a password. Since 2026-11-26 this is how every
+    // visitor enters (the owner turned sign-in off); the route answers 404
+    // again only when REQUIRE_SIGN_IN=1, so a rule here grants nothing alone.
     { pattern: '/auth/enter', anonymous: true },
     { pattern: '/', capability: 'order.view' },
     { pattern: '/favorites', capability: 'product.favorite' },
@@ -78,9 +78,9 @@ const USER_RULES: readonly RouteRule[] = Object.freeze([
 
 const MANUFACTURER_RULES: readonly RouteRule[] = Object.freeze([
     ...SHARED_AUTH_ROUTES,
-    // Review mode only: signing in without a password when the review
-    // environment asks for it. The route itself answers 404 unless
-    // REVIEW_DIRECT_SIGN_IN is set, so a rule here grants nothing on its own.
+    // Signing in without a password. Since 2026-11-26 this is how every
+    // visitor enters (the owner turned sign-in off); the route answers 404
+    // again only when REQUIRE_SIGN_IN=1, so a rule here grants nothing alone.
     { pattern: '/auth/enter', anonymous: true },
     { pattern: '/', capability: 'rfq.view' },
     { pattern: '/dashboard', capability: 'rfq.view' },

@@ -15,8 +15,15 @@ import { database } from './db.js';
  * - the session it issues is an ordinary one, from the same service the password
  *   path uses, so every guard and capability still applies.
  */
-export const directSignInEnabled = (): boolean =>
-  process.env['REVIEW_DIRECT_SIGN_IN'] === '1';
+/*
+ * Sign-in is off (owner, 2026-11-26: "no sign-in needed, anywhere"). Every
+ * visitor enters on sight as the seeded account with the most to look at, on
+ * this machine and on the hosted panels alike — so anyone with the address can
+ * read and change the demo data. The password path is still here, untouched:
+ * `REQUIRE_SIGN_IN=1` brings it back, which is what the verification harnesses
+ * set so they keep exercising the real guards.
+ */
+export const directSignInEnabled = (): boolean => process.env['REQUIRE_SIGN_IN'] !== '1';
 
 export interface DirectSignInAccount {
   readonly userId: string;
@@ -100,7 +107,10 @@ export const directSignInAdmitted = (request: {
   // one is correct, and it is also the one that gets bookmarked without its
   // token and then reads as a dead panel. Setting this says the operator
   // accepts that anyone with the address is in.
-  if (process.env['REVIEW_DIRECT_SIGN_IN_OPEN'] === '1') {
+  //
+  // Open is now the default (see `directSignInEnabled`); an operator who wants
+  // the tokened link back sets REVIEW_DIRECT_SIGN_IN_OPEN=0.
+  if (process.env['REVIEW_DIRECT_SIGN_IN_OPEN'] !== '0') {
     return { admitted: true, setCookie: undefined };
   }
 

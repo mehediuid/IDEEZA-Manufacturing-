@@ -7,6 +7,12 @@ Nothing here contains a credential. Every value marked `«…»` is supplied at 
 time it is used and lives only in Vercel's environment settings or in a local
 `.env` file that git ignores.
 
+> **2026-11-26 — sign-in is off by default.** The owner asked for no sign-in
+> anywhere, so the panels now admit every visitor without a token unless
+> `REVIEW_DIRECT_SIGN_IN_OPEN=0` is set, and without `REVIEW_DIRECT_SIGN_IN`
+> at all unless `REQUIRE_SIGN_IN=1` is set. The token steps below are how to
+> close a hosted panel again.
+
 ## What is being deployed
 
 | Panel | Vercel root directory | Landing page |

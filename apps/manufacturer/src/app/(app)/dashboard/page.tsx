@@ -31,8 +31,6 @@ import {
 import { listDisputes, listRefundClaims } from '@/data/resolution.js';
 import { getShopContext } from '@/data/shop.js';
 import { linkIfBuilt } from '@/lib/navigation.js';
-import { readProgress } from '@/data/tour.js';
-import { stopHref, TOURS } from '@/data/tours.js';
 import { REVIEW_WINDOW_DAYS } from '@/lib/review-window.js';
 import { requireManufacturer } from '@/lib/auth.js';
 
@@ -261,7 +259,7 @@ const DashboardPage = async ({
   const askedWork = (await searchParams)['work'];
   const workScope: WorkScope =
     askedWork === 'pcb' || askedWork === 'module_3d' ? askedWork : 'all';
-  const [shop, tiles, sections, disputes, walked, claims] = await Promise.all([
+  const [shop, tiles, sections, disputes, claims] = await Promise.all([
     getShopContext(actor.manufacturerId, actor.userId),
     getHeadlineTiles(actor.manufacturerId),
     getDashboardSections(actor.manufacturerId, {
@@ -269,7 +267,6 @@ const DashboardPage = async ({
       userId: actor.userId,
     }),
     listDisputes(actor.manufacturerId),
-    readProgress(actor.userId),
     listRefundClaims(actor.manufacturerId),
   ]);
 
@@ -286,13 +283,6 @@ const DashboardPage = async ({
 
   const openDisputes = disputes.filter((dispute) => dispute.status !== 'resolved');
   const unanswered = openDisputes.filter((dispute) => dispute.status === 'open');
-
-  // The tour is offered here exactly once in somebody's life on this panel:
-  // until they have started one. A guided tour nobody finds is a guided tour
-  // nobody takes, and the rail row alone was not finding anybody. It disappears
-  // the moment a tour is begun rather than needing to be dismissed, because a
-  // dismissal is a preference to store for something that answers itself.
-  const firstTour = Object.keys(walked).length === 0 ? TOURS[0] : undefined;
 
   const now = Date.now();
   /*
@@ -416,38 +406,6 @@ const DashboardPage = async ({
               ]),
         ]}
       />
-
-      {/*
-        The tour offer is an invitation, not an alarm, so it is drawn as one
-        quiet line rather than a third framed card competing with the cases
-        above it for the first screen.
-      */}
-      {firstTour !== undefined && (
-        <div
-          data-tour="dashboard-tour-offer"
-          className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-3 rounded-xl bg-bg-subtle px-5 py-3 sm:grid-cols-[auto_minmax(0,1fr)_auto] md:px-6"
-        >
-          <Icon name="map" size={18} className="self-start text-icon-brand sm:self-center" />
-          <p className="text-sm text-text-secondary">
-            <span className="font-semibold text-text-primary">
-              New here? Let the panel show you round.
-            </span>{' '}
-            {firstTour.stops.length} stops on the real screens, about {firstTour.minutes} minutes,
-            and you can stop in the middle.
-          </p>
-          <div className="col-start-2 flex flex-wrap items-center gap-2 sm:col-start-3 sm:pl-3">
-            <Link
-              href={stopHref(firstTour, 0)}
-              className={buttonAppearance({ variant: 'tonal', size: 'xs' })}
-            >
-              Start the tour
-            </Link>
-            <Link href="/tour" className={buttonAppearance({ variant: 'ghost', size: 'xs' })}>
-              All tours
-            </Link>
-          </div>
-        </div>
-      )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <Tile

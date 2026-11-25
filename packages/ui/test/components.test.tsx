@@ -803,4 +803,22 @@ describe('ActionList', () => {
     const { container } = render(<ActionList title="Needs your attention" items={[]} />);
     expect(container.innerHTML).toBe('');
   });
+
+  it('starts open and folds away from its header, like an accordion', async () => {
+    render(<ActionList title="Needs your attention" items={items} />);
+    const section = screen.getByRole('region', { name: /Needs your attention/ });
+    const fold = section.querySelector('details');
+    expect(fold?.open).toBe(true);
+
+    // The whole header is the control, so the title and the chevron both fold it.
+    await userEvent.click(within(section).getByText('Needs your attention'));
+    expect(fold?.open).toBe(false);
+  });
+
+  it('can start folded', () => {
+    render(<ActionList title="Needs your attention" items={items} defaultOpen={false} />);
+    expect(
+      screen.getByRole('region', { name: /Needs your attention/ }).querySelector('details')?.open,
+    ).toBe(false);
+  });
 });

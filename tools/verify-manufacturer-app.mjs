@@ -302,7 +302,9 @@ const main = async () => {
     process.stdout.write('starting the built app…\n');
     appProcess = spawn(process.execPath, [nextCli, 'start', '--port', String(appPort)], {
       cwd: appDir,
-      env: { ...process.env, DATABASE_URL: databaseUrl, NODE_ENV: 'production' },
+      // Sign-in is off by default now; this harness checks the real guards,
+        // so it turns the password path back on for the apps it starts.
+        env: { ...process.env, DATABASE_URL: databaseUrl, NODE_ENV: 'production', REQUIRE_SIGN_IN: '1' },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     appProcess.stdout.on('data', (chunk) => appLog.push(String(chunk)));
@@ -2697,9 +2699,11 @@ const main = async () => {
     // something this shop has not got says so instead of pointing at nothing,
     // and that leaving and coming back lands where it left off.
     await page.goto(`${base}/dashboard`, { waitUntil: 'networkidle' });
+    // The dashboard's tour offer was taken off at the owner's request
+    // (2026-11-26); the tours themselves stay at /tour.
     check(
-      'the dashboard offers the tour to somebody who has not walked one',
-      await visible(page.getByText('New here? Let the panel show you round.')),
+      'the dashboard no longer carries a tour offer',
+      (await page.getByText('New here? Let the panel show you round.').count()) === 0,
     );
 
     await page.goto(`${base}/tour`, { waitUntil: 'networkidle' });

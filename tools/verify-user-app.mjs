@@ -159,7 +159,9 @@ const main = async () => {
       [nextCli, 'start', '--port', String(appPort)],
       {
         cwd: appDir,
-        env: { ...process.env, DATABASE_URL: databaseUrl, NODE_ENV: 'production' },
+        // Sign-in is off by default now; this harness checks the real guards,
+        // so it turns the password path back on for the apps it starts.
+        env: { ...process.env, DATABASE_URL: databaseUrl, NODE_ENV: 'production', REQUIRE_SIGN_IN: '1' },
         stdio: ['ignore', 'pipe', 'pipe'],
       },
     );

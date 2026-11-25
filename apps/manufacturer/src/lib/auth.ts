@@ -2,7 +2,6 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import {
   AuthError,
-  SESSION_COOKIE_NAME,
   assertRouteAccess,
   createAuthServices,
   type AuthServices,
@@ -10,6 +9,7 @@ import {
 } from '@ideeza/auth';
 import { PermissionDeniedError, type ManufacturerId } from '@ideeza/domain';
 import { database } from './db.js';
+import { SESSION_COOKIE } from './session-cookie.js';
 
 /** The surface this app serves. Everything here is checked against it. */
 export const SURFACE = 'manufacturer' as const;
@@ -19,7 +19,7 @@ export const authServices = (): AuthServices => createAuthServices(database());
 /** Reads the actor for the current request, or null when there is no session. */
 export const currentActor = async (): Promise<AuthenticatedActor | null> => {
   const store = await cookies();
-  const token = store.get(SESSION_COOKIE_NAME)?.value;
+  const token = store.get(SESSION_COOKIE)?.value;
   if (token === undefined || token === '') return null;
   try {
     return await authServices().sessionService.resolveActor(token);

@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { SESSION_COOKIE_NAME } from '@ideeza/auth';
+import { SESSION_COOKIE } from '@/lib/session-cookie.js';
 import { authServices } from '@/lib/auth.js';
 import {
   REVIEW_TOKEN_COOKIE_MAX_AGE,
@@ -73,7 +73,7 @@ export const GET = async (request: NextRequest): Promise<NextResponse> => {
   });
 
   const response = NextResponse.redirect(new URL(next, request.url));
-  response.cookies.set(SESSION_COOKIE_NAME, issued.token, {
+  response.cookies.set(SESSION_COOKIE, issued.token, {
     httpOnly: true,
     sameSite: 'lax',
     secure,

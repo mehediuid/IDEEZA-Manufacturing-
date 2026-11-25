@@ -5,7 +5,6 @@ import { usePathname } from 'next/navigation';
 import { Text, Tooltip, cn } from '@ideeza/ui';
 import {
   PRIMARY_NAV,
-  SECONDARY_NAV,
   isNavEntryActive,
   type NavEntry,
 } from '@/lib/navigation.js';
@@ -107,7 +106,7 @@ export interface SidebarProps {
  * actually needs prompting about: an incomplete profile, because capabilities are
  * what decide whether a buyer's request ever reaches this inbox.
  */
-export const Sidebar = ({ onNavigate, onOpen, className, profileCompleteness }: SidebarProps) => (
+export const Sidebar = ({ onNavigate, className, profileCompleteness }: SidebarProps) => (
   <nav
     aria-label="Main"
     className={cn(
@@ -148,16 +147,11 @@ export const Sidebar = ({ onNavigate, onOpen, className, profileCompleteness }: 
         </div>
       )}
 
-      <div>
-        <p className="px-3 text-xs font-semibold uppercase tracking-caps text-text-tertiary">
-          For you
-        </p>
-        <ul className="mt-1 flex flex-col gap-1">
-          {SECONDARY_NAV.map((entry) => (
-            <NavRow key={entry.id} entry={entry} {...(onOpen === undefined ? {} : { onOpen })} />
-          ))}
-        </ul>
-      </div>
+      {/*
+        The "For you" rail (Tutorial, Tour Guide, Report a problem) is off the
+        sidebar at the owner's request (2026-11-26). Its screens still exist at
+        /tutorial and /tour; only the rail entries are gone.
+      */}
     </div>
   </nav>
 );

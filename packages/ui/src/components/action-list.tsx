@@ -32,6 +32,8 @@ export interface ActionListProps extends Omit<HTMLAttributes<HTMLElement>, 'titl
   readonly items: readonly ActionListItem[];
   /** Where the list sits in the page outline; it looks the same at either level. */
   readonly level?: 2 | 3;
+  /** Whether the rows show on arrival. The header folds and unfolds them either way. */
+  readonly defaultOpen?: boolean;
 }
 
 /*
@@ -79,6 +81,7 @@ export const ActionList = ({
   count,
   items,
   level = 2,
+  defaultOpen = true,
   className,
   ...rest
 }: ActionListProps) => {
@@ -87,52 +90,66 @@ export const ActionList = ({
   return (
     <section aria-label={title} className={className} {...rest}>
       <Card padded={false} className="overflow-hidden">
-        <div className="flex items-center gap-2 px-5 py-4 md:px-6">
-          <Heading level={3} as={`h${level}`}>
-            {title}
-          </Heading>
-          {count !== undefined && <Badge tone="neutral">{count}</Badge>}
-        </div>
-        <ul className="divide-y divide-border-subtle border-t border-border-subtle">
-          {items.map((item) => (
-            // A grid rather than nested flex rows, so that on a phone the
-            // actions drop into the words' column and line up under the title
-            // without an indent computed from the ring's width — the spacing
-            // scale has no step equal to ring plus gap, and a guessed one was
-            // 8px off. From `sm` the actions take a third column of their own.
-            <li
-              key={item.id}
-              data-tone={item.tone}
-              className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-3 px-5 py-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] md:px-6"
-            >
-              <span
-                className={cn(
-                  'flex size-9 items-center justify-center rounded-full border',
-                  RING[item.tone],
-                )}
+        {/*
+          An accordion (owner, 2026-11-26: "so it can collapse"). A native
+          <details> rather than the client Accordion: it folds without
+          JavaScript, keeps this a server component, and the browser announces
+          it as expanded or collapsed on its own. The whole header is the
+          control; the chevron only says which way it will go.
+        */}
+        <details open={defaultOpen} className="group">
+          <summary className="flex cursor-pointer list-none items-center gap-2 px-5 py-4 transition-colors duration-fast hover:bg-bg-surface-raised focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-focus md:px-6 [&::-webkit-details-marker]:hidden">
+            <Heading level={3} as={`h${level}`}>
+              {title}
+            </Heading>
+            {count !== undefined && <Badge tone="neutral">{count}</Badge>}
+            <Icon
+              name="chevron-down"
+              size={20}
+              className="ml-auto text-icon-secondary transition-transform duration-fast ease-standard group-open:rotate-180"
+            />
+          </summary>
+          <ul className="divide-y divide-border-subtle border-t border-border-subtle">
+            {items.map((item) => (
+              // A grid rather than nested flex rows, so that on a phone the
+              // actions drop into the words' column and line up under the title
+              // without an indent computed from the ring's width — the spacing
+              // scale has no step equal to ring plus gap, and a guessed one was
+              // 8px off. From `sm` the actions take a third column of their own.
+              <li
+                key={item.id}
+                data-tone={item.tone}
+                className="grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-3 px-5 py-4 sm:grid-cols-[auto_minmax(0,1fr)_auto] md:px-6"
               >
-                <Icon name={GLYPH[item.tone]} size={18} label={SEVERITY[item.tone]} />
-              </span>
-              <div className="min-w-0">
-                <p className="text-sm font-semibold text-text-primary">{item.title}</p>
-                {item.detail !== undefined && (
-                  <p className="mt-0.5 line-clamp-2 max-w-measure text-sm text-text-secondary">
-                    {item.detail}
-                  </p>
-                )}
-                {item.note !== undefined && (
-                  <p className="mt-1 max-w-measure text-xs text-text-tertiary">{item.note}</p>
-                )}
-              </div>
-              {(item.due !== undefined || item.actions !== undefined) && (
-                <div className="col-start-2 flex flex-wrap items-center gap-2 sm:col-start-3 sm:row-start-1 sm:self-center sm:justify-end sm:pl-3">
-                  {item.due !== undefined && <Badge tone={item.tone}>{item.due}</Badge>}
-                  {item.actions}
+                <span
+                  className={cn(
+                    'flex size-9 items-center justify-center rounded-full border',
+                    RING[item.tone],
+                  )}
+                >
+                  <Icon name={GLYPH[item.tone]} size={18} label={SEVERITY[item.tone]} />
+                </span>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold text-text-primary">{item.title}</p>
+                  {item.detail !== undefined && (
+                    <p className="mt-0.5 line-clamp-2 max-w-measure text-sm text-text-secondary">
+                      {item.detail}
+                    </p>
+                  )}
+                  {item.note !== undefined && (
+                    <p className="mt-1 max-w-measure text-xs text-text-tertiary">{item.note}</p>
+                  )}
                 </div>
-              )}
-            </li>
-          ))}
-        </ul>
+                {(item.due !== undefined || item.actions !== undefined) && (
+                  <div className="col-start-2 flex flex-wrap items-center gap-2 sm:col-start-3 sm:row-start-1 sm:self-center sm:justify-end sm:pl-3">
+                    {item.due !== undefined && <Badge tone={item.tone}>{item.due}</Badge>}
+                    {item.actions}
+                  </div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </details>
       </Card>
     </section>
   );
