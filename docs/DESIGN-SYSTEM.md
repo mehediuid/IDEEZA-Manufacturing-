@@ -44,7 +44,7 @@ the 960 switch the panel file uses.
 | Status | `StatusChip`, `StatusDot`, `Badge`, `Tag`, `statusPresentation` |
 | Navigation | `Tabs` (button or link mode) + `TabPanel`, `Breadcrumbs`, `DropdownMenu` |
 | Overlay | `Modal`, `Drawer`, `Tooltip`, `Toast` + `ToastProvider` |
-| Feedback | `Alert` (5 tones), `EmptyState`, `LoadingState`, `ErrorState`, `Skeleton`, `SkeletonRows`, `NotBuiltYet` |
+| Feedback | `Alert` (5 tones), `ActionList` (what is waiting on the reader: one card, a row per case, severity on the row's icon and badge), `EmptyState`, `LoadingState`, `ErrorState`, `Skeleton`, `SkeletonRows`, `NotBuiltYet` |
 | Misc | `Avatar` |
 
 `statusPresentation` is the bridge to the domain layer: it maps a domain status
@@ -196,6 +196,15 @@ handled differently.
   control.
 - The save group on the draft form carried a level-4 screen-reader heading under
   a level-2 section.
+- The manufacturer dashboard opened on three stacked full-width boxes — a red
+  refund-claim alert, a yellow dispute alert and a purple tour card — each with
+  its own primary button. On a phone they filled the first screen and not one
+  headline number was above the fold. They are now one `ActionList` ("Needs your
+  attention", a row per case with its deadline as a badge and a secondary
+  "Answer it") and the tour offer is one quiet line under it. The Figma system
+  has no list of this kind; it is composed from M21 Card, A17 Badge and F06 Icon.
+  The severity ring is a coloured border, not a `-subtle` disc, for the dark
+  theme's missing 950 step described in `styles/base.css`.
 
 ### Deliberate, and why
 

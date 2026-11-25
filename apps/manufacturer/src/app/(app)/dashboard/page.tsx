@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import {
-  Alert,
+  ActionList,
   Avatar,
   Badge,
   Icon,
@@ -334,105 +334,119 @@ const DashboardPage = async ({
         }
       />
 
-      {firstClaim !== undefined && (
-        <div data-tour="dashboard-claim">
-          <Alert
-            tone="danger"
-            title={
-              unansweredClaims.length === 1
-                ? `${firstClaim.buyerName} has claimed ${firstClaim.currency} ${major(firstClaim.requestedAmountMinor)} back on ${firstClaim.productName}`
-                : `${String(unansweredClaims.length)} refund claims are waiting on your answer`
-            }
-            actions={
-              <Link
-                href={`/orders/${firstClaim.orderId}`}
-                className={buttonAppearance({ variant: 'primary', size: 'sm' })}
-              >
-                Answer it
-              </Link>
-            }
-          >
-            {issueReasonLabel(firstClaim.reason)} — {firstClaim.description}
-            <span className="mt-1 block font-medium text-text-primary">
-              Answer by{' '}
-              {deadline(
-                new Date(firstClaim.createdAt.getTime() + REVIEW_WINDOW_DAYS * 86_400_000),
-              )}
-              .
-              If you do not, IDEEZA decides on what is on the record, and that will be
-              their account alone.
-            </span>
-          </Alert>
-        </div>
-      )}
+      {/*
+        Everything waiting on the shop, in one list (owner, 2026-11-26: three
+        stacked full-width alerts took the whole first screen — on a phone not
+        one number was left above the fold). A row per case, its severity on
+        the row's icon and badge, its action at the end of the row. The tour
+        points at the whole list, because a claim and a case both belong here.
+      */}
+      <ActionList
+        title="Needs your attention"
+        count={unansweredClaims.length + openDisputes.length}
+        data-tour="dashboard-notice"
+        items={[
+          ...(firstClaim === undefined
+            ? []
+            : [
+                {
+                  id: 'claim',
+                  tone: 'danger' as const,
+                  title:
+                    unansweredClaims.length === 1
+                      ? `${firstClaim.buyerName} has claimed ${firstClaim.currency} ${major(firstClaim.requestedAmountMinor)} back on ${firstClaim.productName}`
+                      : `${String(unansweredClaims.length)} refund claims are waiting on your answer`,
+                  detail: `${issueReasonLabel(firstClaim.reason)} — ${firstClaim.description}`,
+                  due: `Answer by ${deadline(
+                    new Date(firstClaim.createdAt.getTime() + REVIEW_WINDOW_DAYS * 86_400_000),
+                  )}`,
+                  note: 'If you do not answer by then, IDEEZA decides on what is on the record, and that will be the buyer’s account alone.',
+                  actions: (
+                    <Link
+                      href={`/orders/${firstClaim.orderId}`}
+                      className={buttonAppearance({ variant: 'secondary', size: 'sm' })}
+                    >
+                      Answer it
+                    </Link>
+                  ),
+                },
+              ]),
+          ...(openDisputes.length === 0
+            ? []
+            : [
+                {
+                  id: 'dispute',
+                  tone: 'warning' as const,
+                  title:
+                    openDisputes.length === 1
+                      ? `A dispute is open on ${openDisputes[0]?.productName ?? 'an order'}`
+                      : `${String(openDisputes.length)} disputes are open on your orders`,
+                  detail:
+                    unanswered.length > 0
+                      ? `${String(unanswered.length)} of them has had no answer from you yet.`
+                      : 'Answered and with IDEEZA.',
+                  due: 'Payout held',
+                  note:
+                    unanswered.length > 0
+                      ? 'IDEEZA decides a dispute on what is written on the case, and the payout stays held until it does.'
+                      : 'The payout stays held until the case is decided.',
+                  actions: (
+                    <>
+                      {openDisputes.length > 1 && (
+                        <Link
+                          href="/settings"
+                          className={buttonAppearance({ variant: 'ghost', size: 'sm' })}
+                        >
+                          See all of them
+                        </Link>
+                      )}
+                      <Link
+                        href={
+                          openDisputes[0] === undefined
+                            ? '/orders'
+                            : `/orders/${openDisputes[0].orderId}/disputes/${openDisputes[0].id}`
+                        }
+                        className={buttonAppearance({ variant: 'secondary', size: 'sm' })}
+                      >
+                        {unanswered.length > 0 ? 'Answer it' : 'Open the case'}
+                      </Link>
+                    </>
+                  ),
+                },
+              ]),
+        ]}
+      />
 
-      {openDisputes.length > 0 && (
-        <div data-tour="dashboard-notice">
-          <Alert
-            tone="warning"
-            title={
-              openDisputes.length === 1
-                ? `A dispute is open on ${openDisputes[0]?.productName ?? 'an order'}`
-                : `${String(openDisputes.length)} disputes are open on your orders`
-            }
-            actions={
-              <div className="flex flex-wrap gap-2">
-                <Link
-                  href={
-                    openDisputes[0] === undefined
-                      ? '/orders'
-                      : `/orders/${openDisputes[0].orderId}/disputes/${openDisputes[0].id}`
-                  }
-                  className={buttonAppearance({ variant: 'primary', size: 'sm' })}
-                >
-                  {unanswered.length > 0 ? 'Answer it' : 'Open the case'}
-                </Link>
-                {openDisputes.length > 1 && (
-                  <Link
-                    href="/settings"
-                    className={buttonAppearance({ variant: 'secondary', size: 'sm' })}
-                  >
-                    See all of them
-                  </Link>
-                )}
-              </div>
-            }
-          >
-            {unanswered.length > 0
-              ? `${String(unanswered.length)} of them has had no answer from you yet. IDEEZA decides a dispute on what is written on the case, and the payout stays held until it does.`
-              : 'Answered and with IDEEZA. The payout stays held until the case is decided.'}
-          </Alert>
-        </div>
-      )}
-
+      {/*
+        The tour offer is an invitation, not an alarm, so it is drawn as one
+        quiet line rather than a third framed card competing with the cases
+        above it for the first screen.
+      */}
       {firstTour !== undefined && (
-        <Card tone="brand" data-tour="dashboard-tour-offer">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div className="min-w-0">
-              <p className="text-sm font-semibold text-text-primary">
-                New here? Let the panel show you round.
-              </p>
-              <Text size="sm" tone="muted" className="mt-1 block max-w-measure">
-                {firstTour.stops.length} stops on the real screens, about{' '}
-                {firstTour.minutes} minutes, and you can stop in the middle — {firstTour.promise.toLowerCase()}
-              </Text>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Link
-                href={stopHref(firstTour, 0)}
-                className={buttonAppearance({ variant: 'primary', size: 'sm' })}
-              >
-                Start the tour
-              </Link>
-              <Link
-                href="/tour"
-                className={buttonAppearance({ variant: 'secondary', size: 'sm' })}
-              >
-                All five tours
-              </Link>
-            </div>
+        <div
+          data-tour="dashboard-tour-offer"
+          className="grid grid-cols-[auto_minmax(0,1fr)] items-center gap-x-3 gap-y-3 rounded-xl bg-bg-subtle px-5 py-3 sm:grid-cols-[auto_minmax(0,1fr)_auto] md:px-6"
+        >
+          <Icon name="map" size={18} className="self-start text-icon-brand sm:self-center" />
+          <p className="text-sm text-text-secondary">
+            <span className="font-semibold text-text-primary">
+              New here? Let the panel show you round.
+            </span>{' '}
+            {firstTour.stops.length} stops on the real screens, about {firstTour.minutes} minutes,
+            and you can stop in the middle.
+          </p>
+          <div className="col-start-2 flex flex-wrap items-center gap-2 sm:col-start-3 sm:pl-3">
+            <Link
+              href={stopHref(firstTour, 0)}
+              className={buttonAppearance({ variant: 'tonal', size: 'xs' })}
+            >
+              Start the tour
+            </Link>
+            <Link href="/tour" className={buttonAppearance({ variant: 'ghost', size: 'xs' })}>
+              All tours
+            </Link>
           </div>
-        </Card>
+        </div>
       )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

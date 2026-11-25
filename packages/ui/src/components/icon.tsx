@@ -1,6 +1,7 @@
 import { HugeiconsIcon } from '@hugeicons/react';
 import {
   Alert01Icon,
+  AlertCircleIcon,
   ArrowDown01Icon,
   ArrowRight01Icon,
   Book02Icon,
@@ -60,6 +61,7 @@ import { cn } from '../lib/cn.js';
  */
 export type IconName =
   | 'alert'
+  | 'alert-circle'
   | 'bell'
   | 'blog'
   | 'board'
@@ -105,6 +107,7 @@ export type IconName =
 
 const GLYPH = {
   alert: Alert01Icon,
+  'alert-circle': AlertCircleIcon,
   bell: Notification01Icon,
   blog: News01Icon,
   board: ChipIcon,

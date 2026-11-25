@@ -3,6 +3,7 @@ import { render, screen, within } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import {
   Accordion,
+  ActionList,
   Alert,
   Avatar,
   Badge,
@@ -742,5 +743,64 @@ describe('StageTrack', () => {
     // stepped track exists to remove.
     render(<StageTrack total={10} completed={0} stageLabel={null} state="held" />);
     expect(screen.getByText('Not started · 0/10 · held')).toBeTruthy();
+  });
+});
+
+describe('ActionList', () => {
+  const items = [
+    {
+      id: 'claim',
+      tone: 'danger' as const,
+      title: 'Nova Robotics has claimed USD 240.00 back',
+      detail: 'Failed the quality check',
+      note: 'If you do not answer, IDEEZA decides on the record.',
+      due: 'Answer by Dec 2',
+      actions: <a href="/orders/1">Answer it</a>,
+    },
+    {
+      id: 'dispute',
+      tone: 'warning' as const,
+      title: 'A dispute is open on Beacon Light Board',
+      actions: <a href="/orders/2">Open the case</a>,
+    },
+  ];
+
+  it('is one named section with a row per item, each carrying its own action', () => {
+    render(<ActionList title="Needs your attention" count={3} items={items} />);
+
+    const section = screen.getByRole('region', { name: /Needs your attention/ });
+    // The count is the number of cases, which can be more than the rows: one
+    // row stands for every unanswered claim.
+    expect(within(section).getByText('3')).toBeTruthy();
+
+    const rows = within(section).getAllByRole('listitem');
+    expect(rows).toHaveLength(2);
+    expect(within(rows[0]!).getByText('Failed the quality check')).toBeTruthy();
+    expect(within(rows[0]!).getByText('Answer by Dec 2')).toBeTruthy();
+    expect(within(rows[0]!).getByRole('link', { name: 'Answer it' })).toBeTruthy();
+    expect(within(rows[1]!).getByRole('link', { name: 'Open the case' })).toBeTruthy();
+  });
+
+  it('says the severity on the row, not only in a colour', () => {
+    render(<ActionList title="Needs your attention" items={items} />);
+    const [claim, dispute] = screen.getAllByRole('listitem');
+    expect(claim?.getAttribute('data-tone')).toBe('danger');
+    expect(dispute?.getAttribute('data-tone')).toBe('warning');
+    // The icon is named for a screen reader, because the ring around it is the
+    // only other place the severity is drawn.
+    expect(within(claim!).getByLabelText('Urgent')).toBeTruthy();
+    expect(within(dispute!).getByLabelText('Needs attention')).toBeTruthy();
+  });
+
+  it('passes attributes through, so a tour can point at the whole list', () => {
+    render(<ActionList title="Needs your attention" items={items} data-tour="dashboard-notice" />);
+    expect(
+      screen.getByRole('region', { name: /Needs your attention/ }).getAttribute('data-tour'),
+    ).toBe('dashboard-notice');
+  });
+
+  it('draws nothing when nothing is waiting', () => {
+    const { container } = render(<ActionList title="Needs your attention" items={[]} />);
+    expect(container.innerHTML).toBe('');
   });
 });

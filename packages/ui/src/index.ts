@@ -32,6 +32,7 @@ export * from './components/accordion.js';
 export * from './components/dropdown-menu.js';
 export * from './components/overlay.js';
 export * from './components/tooltip.js';
+export * from './components/action-list.js';
 export * from './components/alert.js';
 export * from './components/toast.js';
 export * from './components/table.js';
